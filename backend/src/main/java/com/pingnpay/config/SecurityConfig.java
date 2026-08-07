@@ -46,6 +46,7 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/v1/auth/**").permitAll()
+                .requestMatchers("/v1/payments/stripe-webhook").permitAll()  // Stripe signature-verified
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

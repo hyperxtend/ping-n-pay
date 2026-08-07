@@ -71,6 +71,16 @@ public class Invoice {
 
     private String notes;
 
+    @Column(name = "amount_paid", nullable = false, precision = 19, scale = 4)
+    @Builder.Default
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    @Column(name = "stripe_payment_intent_id")
+    private String stripePaymentIntentId;
+
+    @Column(name = "stripe_checkout_session_id")
+    private String stripeCheckoutSessionId;
+
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     @Builder.Default
@@ -92,5 +102,27 @@ public class Invoice {
                     "Cannot transition invoice from %s to %s".formatted(status, next));
         }
         this.status = next;
+    }
+
+    /**
+     * Apply a payment amount and auto-transition status.
+     * SENT / OVERDUE → PARTIALLY_PAID or PAID depending on balance.
+     */
+    public void applyPayment(BigDecimal amount) {
+        this.amountPaid = this.amountPaid.add(amount);
+        BigDecimal balance = this.total.subtract(this.amountPaid);
+        if (balance.compareTo(BigDecimal.ZERO) <= 0) {
+            if (status.canTransitionTo(InvoiceStatus.PAID)) {
+                this.status = InvoiceStatus.PAID;
+            }
+        } else {
+            if (status.canTransitionTo(InvoiceStatus.PARTIALLY_PAID)) {
+                this.status = InvoiceStatus.PARTIALLY_PAID;
+            }
+        }
+    }
+
+    public BigDecimal getBalanceDue() {
+        return total.subtract(amountPaid).max(BigDecimal.ZERO);
     }
 }

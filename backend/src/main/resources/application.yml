@@ -72,6 +72,10 @@ app:
     auth-token: ${TWILIO_AUTH_TOKEN:}
     from-number: ${TWILIO_FROM_NUMBER:}          # e.g. +447700900000
     whatsapp-from: ${TWILIO_WHATSAPP_FROM:}      # e.g. whatsapp:+14155238886
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}            # sk_test_...
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}    # whsec_...
+  base-url: ${BASE_URL:http://localhost:5173}
 
 logging:
   level:
