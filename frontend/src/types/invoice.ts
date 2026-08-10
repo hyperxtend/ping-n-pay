@@ -28,13 +28,15 @@ export interface Invoice extends InvoiceSummary {
     phone?: string
     address?: string
   }
-  subtotal: number
-  taxAmount: number
+  subtotal:     number
+  taxAmount:    number
   discountAmount: number
-  notes?: string
-  items: InvoiceItem[]
-  createdAt: string
-  updatedAt: string
+  amountPaid:   number
+  balanceDue:   number
+  notes?:       string
+  items:        InvoiceItem[]
+  createdAt:    string
+  updatedAt:    string
 }
 
 export interface CreateInvoiceRequest {
