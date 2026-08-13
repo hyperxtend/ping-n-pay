@@ -10,6 +10,8 @@ import InvoicesPage from './pages/InvoicesPage'
 import InvoiceDetailPage from './pages/InvoiceDetailPage'
 import CreateInvoicePage from './pages/CreateInvoicePage'
 import ClientsPage from './pages/ClientsPage'
+import NotificationsPage from './pages/NotificationsPage'
+import NotificationRulesPage from './pages/NotificationRulesPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +41,9 @@ export default function App() {
               <Route path="/invoices"         element={<InvoicesPage />} />
               <Route path="/invoices/new"     element={<CreateInvoicePage />} />
               <Route path="/invoices/:id"     element={<InvoiceDetailPage />} />
-              <Route path="/clients"          element={<ClientsPage />} />
+              <Route path="/clients"             element={<ClientsPage />} />
+              <Route path="/notifications"      element={<NotificationsPage />} />
+              <Route path="/notification-rules" element={<NotificationRulesPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
