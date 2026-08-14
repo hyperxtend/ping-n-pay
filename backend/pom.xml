@@ -118,6 +118,13 @@
             <version>${twilio.version}</version>
         </dependency>
 
+        <!-- ── Apache Commons CSV ────────────────────────────────────── -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
         <!-- ── Stripe ─────────────────────────────────────────────────── -->
         <dependency>
             <groupId>com.stripe</groupId>

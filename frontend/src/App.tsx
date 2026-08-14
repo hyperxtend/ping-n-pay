@@ -12,6 +12,7 @@ import CreateInvoicePage from './pages/CreateInvoicePage'
 import ClientsPage from './pages/ClientsPage'
 import NotificationsPage from './pages/NotificationsPage'
 import NotificationRulesPage from './pages/NotificationRulesPage'
+import ReportsPage from './pages/ReportsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/clients"             element={<ClientsPage />} />
               <Route path="/notifications"      element={<NotificationsPage />} />
               <Route path="/notification-rules" element={<NotificationRulesPage />} />
+              <Route path="/reports"            element={<ReportsPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

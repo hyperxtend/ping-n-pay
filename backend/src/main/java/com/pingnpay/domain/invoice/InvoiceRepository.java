@@ -13,6 +13,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     List<Invoice> findAllByOrganisationIdOrderByCreatedAtDesc(UUID organisationId);
 
+    @Query("SELECT i FROM Invoice i JOIN FETCH i.client WHERE i.organisation.id = :orgId")
+    List<Invoice> findAllByOrganisationId(UUID orgId);
+
     Optional<Invoice> findByIdAndOrganisationId(UUID id, UUID organisationId);
 
     long countByOrganisationId(UUID organisationId);
