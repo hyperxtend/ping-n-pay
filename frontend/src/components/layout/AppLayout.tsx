@@ -9,6 +9,7 @@ const navItems = [
   { to: '/notifications',        label: 'Notifications'       },
   { to: '/notification-rules',   label: 'Notification Rules'  },
   { to: '/reports',              label: 'Reports'             },
+  { to: '/account',              label: 'Account'             },
 ]
 
 export default function AppLayout() {

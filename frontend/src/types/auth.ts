@@ -11,10 +11,12 @@ export interface UserResponse {
 }
 
 export interface AuthResponse {
-  accessToken: string
-  refreshToken: string
-  tokenType: string
-  user: UserResponse
+  accessToken?:    string
+  refreshToken?:   string
+  tokenType:       string
+  user?:           UserResponse
+  mfaRequired:     boolean
+  mfaPendingToken?: string
 }
 
 export interface LoginRequest {
