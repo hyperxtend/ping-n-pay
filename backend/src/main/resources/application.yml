@@ -77,7 +77,32 @@ app:
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:}    # whsec_...
   base-url: ${BASE_URL:http://localhost:5173}
 
+# ── Actuator ────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true   # /actuator/health/liveness + /actuator/health/readiness
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Ping 'n Pay
+    version: '@project.version@'
+    description: Invoice & overdue payment notification system
+
 logging:
   level:
-    com.pingnpay: DEBUG
-    org.springframework.security: INFO
+    com.pingnpay: ${LOG_LEVEL:INFO}
+    org.springframework.security: WARN
+  pattern:
+    # Structured JSON logging — parse with Datadog / CloudWatch / Loki
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","logger":"%logger{36}","thread":"%t","message":"%msg","trace":"%X{traceId}","span":"%X{spanId}"}%n'

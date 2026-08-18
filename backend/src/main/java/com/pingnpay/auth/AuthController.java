@@ -28,9 +28,24 @@ public class AuthController {
     /**
      * POST /api/v1/auth/login
      * Authenticate with email and password.
+     * If MFA is enabled, returns mfaRequired=true + mfaPendingToken (no accessToken).
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    /**
+     * POST /api/v1/auth/mfa-verify
+     * Complete login by verifying a TOTP code after password-only auth.
+     */
+    @PostMapping("/mfa-verify")
+    public ResponseEntity<AuthResponse> mfaVerify(@Valid @RequestBody MfaVerifyRequest request) {
+        return ResponseEntity.ok(authService.verifyMfa(request.mfaPendingToken(), request.code()));
+    }
+
+    public record MfaVerifyRequest(
+            @jakarta.validation.constraints.NotBlank String mfaPendingToken,
+            @jakarta.validation.constraints.NotBlank String code
+    ) {}
 }

@@ -51,6 +51,20 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean enabled = true;
 
+    // ── MFA ────────────────────────────────────────────────────────────────
+
+    @Column(name = "mfa_enabled", nullable = false)
+    @Builder.Default
+    private boolean mfaEnabled = false;
+
+    /** Base32-encoded TOTP secret (stored encrypted at rest in prod via column-level encryption or KMS). */
+    @Column(name = "mfa_secret")
+    private String mfaSecret;
+
+    /** JSON array of BCrypt-hashed single-use backup codes. */
+    @Column(name = "mfa_backup_codes", columnDefinition = "TEXT")
+    private String mfaBackupCodes;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
