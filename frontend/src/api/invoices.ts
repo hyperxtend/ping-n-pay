@@ -32,4 +32,18 @@ export const invoicesApi = {
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/invoices/${id}`)
   },
+
+  /**
+   * Triggers a PDF download in the browser using a hidden anchor element.
+   * Uses the authenticated endpoint (Bearer token in header).
+   */
+  downloadPdf: async (id: string, filename: string): Promise<void> => {
+    const res = await apiClient.get(`/invoices/${id}/pdf`, { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+    const a   = document.createElement('a')
+    a.href     = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  },
 }

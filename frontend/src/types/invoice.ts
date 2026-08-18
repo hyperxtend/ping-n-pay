@@ -37,6 +37,28 @@ export interface Invoice extends InvoiceSummary {
   items:        InvoiceItem[]
   createdAt:    string
   updatedAt:    string
+  shareToken:   string
+}
+
+/** Shape returned by the unauthenticated public portal endpoint */
+export interface PublicInvoice {
+  id:               string
+  number:           string
+  status:           InvoiceStatus
+  issueDate:        string
+  dueDate:          string
+  currency:         string
+  subtotal:         number
+  taxAmount:        number
+  discountAmount:   number
+  total:            number
+  amountPaid:       number
+  balanceDue:       number
+  notes?:           string
+  clientName:       string
+  organisationName: string
+  items:            InvoiceItem[]
+  stripeCheckoutUrl?: string
 }
 
 export interface CreateInvoiceRequest {

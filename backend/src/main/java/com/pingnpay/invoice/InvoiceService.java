@@ -36,6 +36,12 @@ public class InvoiceService {
         return InvoiceResponse.from(getOwnedInvoice(id, currentUser));
     }
 
+    /** Returns the raw entity — used by the PDF endpoint which needs items loaded. */
+    @Transactional(readOnly = true)
+    public Invoice findInvoiceEntity(UUID id, User currentUser) {
+        return getOwnedInvoice(id, currentUser);
+    }
+
     // ── Create ─────────────────────────────────────────────────────────────
 
     @Transactional

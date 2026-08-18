@@ -3,6 +3,8 @@ package com.pingnpay.invoice;
 import com.pingnpay.domain.invoice.InvoiceStatus;
 import com.pingnpay.domain.user.User;
 import com.pingnpay.invoice.dto.*;
+import com.pingnpay.pdf.InvoicePdfService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,7 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InvoiceController {
 
-    private final InvoiceService invoiceService;
+    private final InvoiceService     invoiceService;
+    private final InvoicePdfService  invoicePdfService;
 
     /** GET /api/v1/invoices — list all invoices for the current user's org */
     @GetMapping
@@ -67,5 +71,21 @@ public class InvoiceController {
             @AuthenticationPrincipal User user) {
         invoiceService.delete(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * GET /api/v1/invoices/{id}/pdf
+     * Streams a PDF of the invoice. Requires the caller to belong to the same org.
+     */
+    @GetMapping("/{id}/pdf")
+    public void downloadPdf(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User user,
+            HttpServletResponse response) throws IOException {
+        var invoice = invoiceService.findInvoiceEntity(id, user);
+        String filename = "invoice-" + invoice.getNumber().replaceAll("[^a-zA-Z0-9\\-]", "_") + ".pdf";
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        invoicePdfService.generate(invoice, response.getOutputStream());
     }
 }

@@ -16,6 +16,7 @@ import ReportsPage from './pages/ReportsPage'
 import MfaVerifyPage from './pages/MfaVerifyPage'
 import MfaSetupPage from './pages/MfaSetupPage'
 import AccountPage from './pages/AccountPage'
+import PublicInvoicePage from './pages/PublicInvoicePage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/login"      element={<LoginPage />} />
             <Route path="/register"   element={<RegisterPage />} />
             <Route path="/mfa-verify" element={<MfaVerifyPage />} />
+            <Route path="/invoice/:token" element={<PublicInvoicePage />} />
 
             {/* Protected — inside sidebar layout */}
             <Route

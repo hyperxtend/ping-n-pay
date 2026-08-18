@@ -47,6 +47,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/v1/auth/**").permitAll()
                 .requestMatchers("/v1/payments/stripe-webhook").permitAll()  // Stripe signature-verified
+                .requestMatchers("/v1/public/**").permitAll()                // Client portal — token-gated
                 .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

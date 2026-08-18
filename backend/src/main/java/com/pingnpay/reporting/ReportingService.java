@@ -57,7 +57,7 @@ public class ReportingService {
             }
         }
 
-        BigDecimal totalCollected = paymentRepository.sumAmountByOrgId(orgId);
+        BigDecimal totalCollected = paymentRepository.sumAmountByOrgId(orgId).orElse(BigDecimal.ZERO);
         AgingReport aging = buildAgingReport(invoices);
 
         return new DashboardMetrics(
