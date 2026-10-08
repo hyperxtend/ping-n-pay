@@ -157,6 +157,18 @@
             <version>1.11.0</version>
         </dependency>
 
+        <!--
+          commons-csv 1.11.0 needs org.apache.commons.io.function.IOStream (added in
+          commons-io 2.12.0), but an older commons-io 2.7 pulled in transitively (via
+          the Twilio SDK) wins Maven's nearest-wins resolution and shadows it, causing
+          a runtime NoClassDefFoundError. Pin a modern version explicitly.
+        -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.16.1</version>
+        </dependency>
+
         <!-- ── OpenPDF (invoice PDF generation) ─────────────────────── -->
         <dependency>
             <groupId>com.github.librepdf</groupId>
