@@ -2,6 +2,7 @@ package com.pingnpay.pdf;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.draw.LineSeparator;
 import com.pingnpay.domain.invoice.Invoice;
 import com.pingnpay.domain.invoice.InvoiceItem;
 import org.springframework.stereotype.Service;
@@ -95,7 +96,6 @@ public class InvoicePdfService {
         bc.setHorizontalAlignment(Element.ALIGN_CENTER);
         bc.setPadding(4);
         bc.setBorder(Rectangle.NO_BORDER);
-        bc.setBorderRadius(4);
         badge.addCell(bc);
         Paragraph badgePara = new Paragraph();
         badgePara.setSpacingBefore(6);
