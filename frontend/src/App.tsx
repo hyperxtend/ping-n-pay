@@ -12,6 +12,11 @@ import CreateInvoicePage from './pages/CreateInvoicePage'
 import ClientsPage from './pages/ClientsPage'
 import NotificationsPage from './pages/NotificationsPage'
 import NotificationRulesPage from './pages/NotificationRulesPage'
+import ReportsPage from './pages/ReportsPage'
+import MfaVerifyPage from './pages/MfaVerifyPage'
+import MfaSetupPage from './pages/MfaSetupPage'
+import AccountPage from './pages/AccountPage'
+import PublicInvoicePage from './pages/PublicInvoicePage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,8 +31,10 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Public */}
-            <Route path="/login"    element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login"      element={<LoginPage />} />
+            <Route path="/register"   element={<RegisterPage />} />
+            <Route path="/mfa-verify" element={<MfaVerifyPage />} />
+            <Route path="/invoice/:token" element={<PublicInvoicePage />} />
 
             {/* Protected — inside sidebar layout */}
             <Route
@@ -44,6 +51,9 @@ export default function App() {
               <Route path="/clients"             element={<ClientsPage />} />
               <Route path="/notifications"      element={<NotificationsPage />} />
               <Route path="/notification-rules" element={<NotificationRulesPage />} />
+              <Route path="/reports"            element={<ReportsPage />} />
+              <Route path="/account"           element={<AccountPage />} />
+              <Route path="/account/mfa"       element={<MfaSetupPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

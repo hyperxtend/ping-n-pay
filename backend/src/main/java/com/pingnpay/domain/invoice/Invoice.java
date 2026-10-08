@@ -81,6 +81,11 @@ public class Invoice {
     @Column(name = "stripe_checkout_session_id")
     private String stripeCheckoutSessionId;
 
+    /** Unguessable token for the public client-portal URL — generated on row insert. */
+    @Column(name = "share_token", nullable = false, updatable = false, columnDefinition = "uuid")
+    @Builder.Default
+    private UUID shareToken = UUID.randomUUID();
+
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     @Builder.Default

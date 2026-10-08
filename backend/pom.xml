@@ -118,6 +118,64 @@
             <version>${twilio.version}</version>
         </dependency>
 
+        <!-- ── Bucket4j (rate limiting) ──────────────────────────────── -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>8.10.1</version>
+        </dependency>
+
+        <!-- ── Google Authenticator / TOTP ───────────────────────────── -->
+        <dependency>
+            <groupId>com.warrenstrange</groupId>
+            <artifactId>googleauth</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
+        <!-- ── QR code generation (for MFA enroll) ───────────────────── -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+
+        <!-- ── Actuator + Micrometer ──────────────────────────────────── -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ── Apache Commons CSV ────────────────────────────────────── -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
+        <!--
+          commons-csv 1.11.0 needs org.apache.commons.io.function.IOStream (added in
+          commons-io 2.12.0), but an older commons-io 2.7 pulled in transitively (via
+          the Twilio SDK) wins Maven's nearest-wins resolution and shadows it, causing
+          a runtime NoClassDefFoundError. Pin a modern version explicitly.
+        -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.16.1</version>
+        </dependency>
+
+        <!-- ── OpenPDF (invoice PDF generation) ─────────────────────── -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.43</version>
+        </dependency>
+
         <!-- ── Stripe ─────────────────────────────────────────────────── -->
         <dependency>
             <groupId>com.stripe</groupId>

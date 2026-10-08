@@ -26,8 +26,8 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setServerError('')
     try {
-      await login(data)
-      navigate('/dashboard')
+      const { mfaRequired } = await login(data)
+      navigate(mfaRequired ? '/mfa-verify' : '/dashboard')
     } catch {
       setServerError('Invalid email or password. Please try again.')
     }

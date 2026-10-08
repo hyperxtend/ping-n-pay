@@ -27,7 +27,8 @@ public record InvoiceResponse(
         String notes,
         List<InvoiceItemResponse> items,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        UUID shareToken
 ) {
     public static InvoiceResponse from(Invoice invoice) {
         return new InvoiceResponse(
@@ -47,7 +48,8 @@ public record InvoiceResponse(
                 invoice.getNotes(),
                 invoice.getItems().stream().map(InvoiceItemResponse::from).toList(),
                 invoice.getCreatedAt(),
-                invoice.getUpdatedAt()
+                invoice.getUpdatedAt(),
+                invoice.getShareToken()
         );
     }
 }

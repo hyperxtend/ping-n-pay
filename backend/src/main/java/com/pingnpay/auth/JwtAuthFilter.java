@@ -23,6 +23,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Sessions are STATELESS, so the SecurityContext only ever exists on the
+     * thread that authenticated it. Endpoints using Servlet async processing
+     * (e.g. StreamingResponseBody, like the CSV export) resume on a different
+     * worker thread via a container ASYNC dispatch, which by default this
+     * filter — and therefore authentication — would skip, leaving Spring
+     * Security's authorization filter to see no Authentication on that second
+     * pass and reject with 403. Re-running here re-authenticates from the
+     * same Authorization header on the async dispatch too.
+     */
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

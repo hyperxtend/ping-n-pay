@@ -27,12 +27,30 @@ public class JwtService {
 
     // ── Token generation ───────────────────────────────────────────────────
 
+    private static final String CLAIM_TOKEN_TYPE = "token_type";
+    private static final String TYPE_MFA_PENDING  = "mfa_pending";
+    private static final long   MFA_PENDING_TTL   = 5 * 60 * 1000L; // 5 minutes
+
     public String generateAccessToken(UserDetails userDetails) {
         return buildToken(Map.of(), userDetails, jwtExpiration);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
         return buildToken(Map.of(), userDetails, refreshExpiration);
+    }
+
+    /** Short-lived token issued after password verification when MFA is required. */
+    public String generateMfaPendingToken(UserDetails userDetails) {
+        return buildToken(Map.of(CLAIM_TOKEN_TYPE, TYPE_MFA_PENDING), userDetails, MFA_PENDING_TTL);
+    }
+
+    public boolean isMfaPendingToken(String token) {
+        try {
+            String type = extractClaim(token, claims -> claims.get(CLAIM_TOKEN_TYPE, String.class));
+            return TYPE_MFA_PENDING.equals(type) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
@@ -52,7 +70,7 @@ public class JwtService {
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
