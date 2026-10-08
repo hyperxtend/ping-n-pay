@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "5fe250ec-833a-46de-a910-1498f23447ac",
     "name": "Ping 'n Pay API",
-    "description": "REST API for Ping 'n Pay — invoicing + overdue payment notifications.\n\nRun \"Auth > Login\" (or \"Auth > Register\" first) to populate {{accessToken}} for the rest of the collection automatically. Requests that create resources (Create Client, Create Invoice, Record Payment, Create Notification Rule) auto-populate the corresponding {{...Id}} variable used by later requests in that folder.\n\nBase URL defaults to the local dev backend (http://localhost:8080/api) per the project README.",
+    "description": "REST API for Ping 'n Pay — invoicing + overdue payment notifications.\n\nRun \"Auth > Login\" (or \"Auth > Register\" first) to populate {{accessToken}} for the rest of the collection automatically. Requests that create resources (Create Client, Create Invoice, Record Payment, Create Notification Rule) auto-populate the corresponding {{...Id}} variable used by later requests in that folder.\n\nIf the logged-in user has MFA enabled, Login instead populates {{mfaPendingToken}} — run Auth > Verify MFA with a TOTP/backup code to complete login and populate {{accessToken}} as normal.\n\nBase URL defaults to the local dev backend (http://localhost:8080/api) per the project README.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20,7 +20,9 @@
     { "key": "clientId", "value": "", "type": "string" },
     { "key": "invoiceId", "value": "", "type": "string" },
     { "key": "notificationRuleId", "value": "", "type": "string" },
-    { "key": "paymentId", "value": "", "type": "string" }
+    { "key": "paymentId", "value": "", "type": "string" },
+    { "key": "mfaPendingToken", "value": "", "type": "string" },
+    { "key": "shareToken", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -77,7 +79,48 @@
               "host": ["{{baseUrl}}"],
               "path": ["v1", "auth", "login"]
             },
-            "description": "Authenticates with email + password. Run this first — the test script saves the access token into {{accessToken}} for every other request in the collection."
+            "description": "Authenticates with email + password. Run this first — the test script saves the access token into {{accessToken}} for every other request in the collection.\n\nIf the account has MFA enabled, the response instead has mfaRequired=true and no accessToken/user — the test script saves mfaPendingToken instead. Follow up with Auth > Verify MFA to finish logging in."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.mfaRequired) {",
+                  "        pm.collectionVariables.set('mfaPendingToken', data.mfaPendingToken);",
+                  "        console.log('MFA required — run Auth > Verify MFA next.');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "        pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "        pm.collectionVariables.set('userId', data.user.id);",
+                  "        pm.collectionVariables.set('organisationId', data.user.organisationId);",
+                  "    }",
+                  "}",
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify MFA",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mfaPendingToken\": \"{{mfaPendingToken}}\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/mfa-verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "mfa-verify"]
+            },
+            "description": "Completes login after Login returned mfaRequired=true. code accepts either the current 6-digit TOTP code or one of the 8 single-use backup codes issued at enrolment (backup codes are consumed on use). mfaPendingToken expires after 5 minutes."
           },
           "event": [
             {
@@ -316,6 +359,19 @@
             },
             "description": "Only DRAFT invoices can be deleted."
           }
+        },
+        {
+          "name": "Download Invoice PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/invoices/{{invoiceId}}/pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "invoices", "{{invoiceId}}", "pdf"]
+            },
+            "description": "Streams a generated PDF of the invoice (application/pdf). In Postman, use \"Send and Download\" to save the file rather than viewing the raw response."
+          }
         }
       ]
     },
@@ -540,6 +596,148 @@
               ]
             },
             "description": "Fires a one-off notification for this invoice outside the normal rule schedule. Returns 202 Accepted immediately; delivery is async."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/reports/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "reports", "dashboard"]
+            },
+            "description": "Headline KPIs for the org: totalInvoiced, totalCollected, totalOutstanding, overdueCount/overdueAmount, counts per status, plus a nested aging report. Computed live from invoices/payments — no caching, no query params."
+          }
+        },
+        {
+          "name": "Aging Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/reports/aging",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "reports", "aging"]
+            },
+            "description": "Accounts-receivable aging: balances bucketed into current / 1-30 / 31-60 / 61-90 / 90+ days overdue (by due date vs today), plus a per-invoice rows[] breakdown. Excludes PAID, VOID, and zero-balance invoices."
+          }
+        },
+        {
+          "name": "Export Invoices CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/reports/invoices.csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "reports", "invoices.csv"]
+            },
+            "description": "Streams every invoice in the org as text/csv (Content-Disposition: attachment). In Postman, use \"Send and Download\" to save the file rather than viewing the raw response. No query params — always the full org dataset."
+          }
+        }
+      ]
+    },
+    {
+      "name": "MFA",
+      "item": [
+        {
+          "name": "Get MFA Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/mfa/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "mfa", "status"]
+            },
+            "description": "Returns { mfaEnabled: boolean } for the current user."
+          }
+        },
+        {
+          "name": "Begin Enrolment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/mfa/enrol",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "mfa", "enrol"]
+            },
+            "description": "Generates a new TOTP secret for the user (saved but not yet active) and returns { secret, qrCodeBase64, otpAuthUrl }. Scan qrCodeBase64 (a data:image/png;base64 PNG) or otpAuthUrl with an authenticator app, then call Confirm Enrolment with a generated code. MFA is NOT enabled until confirmed."
+          }
+        },
+        {
+          "name": "Confirm Enrolment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": 123456\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/mfa/enrol/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "mfa", "enrol", "confirm"]
+            },
+            "description": "code is the current 6-digit TOTP from the authenticator app used in Begin Enrolment. On success, enables MFA and returns a List<String> of 8 single-use backup codes — shown once, store them now."
+          }
+        },
+        {
+          "name": "Disable MFA",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": 123456\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/mfa/disable",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "mfa", "disable"]
+            },
+            "description": "code must be a currently-valid TOTP code (backup codes are not accepted here). Clears mfaEnabled/secret/backup codes on success (204 No Content)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client Portal (Public)",
+      "item": [
+        {
+          "name": "Get Public Invoice",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/public/invoices/{{shareToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "public", "invoices", "{{shareToken}}"]
+            },
+            "description": "Unauthenticated — the UUID share token in the URL IS the credential (invoices.share_token column, set automatically on every invoice). There is currently no authenticated endpoint that surfaces an invoice's share token; fetch it directly from the DB for testing:\n  SELECT share_token FROM invoices WHERE id = '<invoiceId>';\n\nReturns a client-facing view of the invoice (no internal org/user fields). stripeCheckoutUrl is always null for now — Stripe checkout isn't wired up on the portal yet."
+          }
+        },
+        {
+          "name": "Download Public Invoice PDF",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/public/invoices/{{shareToken}}/pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "public", "invoices", "{{shareToken}}", "pdf"]
+            },
+            "description": "Same PDF as the authenticated download, gated only by the share token. Use \"Send and Download\" in Postman to save the file."
           }
         }
       ]
