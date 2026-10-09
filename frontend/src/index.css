@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Redaction, (c) 2019 MCKL Inc. (SIL OFL 1.1, see public/fonts/redaction/OFL.txt) */
+@font-face {
+  font-family: 'Redaction';
+  src: url('/fonts/redaction/Redaction-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

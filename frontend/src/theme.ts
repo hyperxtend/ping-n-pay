@@ -8,6 +8,9 @@ export const colors = {
   porcelain: '#FFFFFA',
 }
 
+// Brand display face for headings (@font-face in index.css)
+export const displayFont = '"Redaction", Georgia, "Times New Roman", serif'
+
 const theme = createTheme({
   palette: {
     primary: {
