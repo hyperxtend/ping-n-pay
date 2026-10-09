@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { NotificationBell } from '../NotificationBell'
@@ -63,7 +64,9 @@ export default function AppLayout() {
         </header>
 
         <main className="flex-1 overflow-auto p-6">
-          <Outlet />
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>
